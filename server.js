@@ -1,8 +1,6 @@
-// const db = require("./db/db.json");
 const fs = require("fs");
 const path = require("path");
 const express = require("express");
-const { json } = require("express");
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -29,10 +27,6 @@ const writeDb = (db) => {
     })
 };
 
-const addNote = (newNote,data) => {
-
-}
-
 app.get("/api/notes", (req, res) => {
     res.sendFile(path.join(__dirname,"./db/db.json"));
 });
@@ -54,14 +48,11 @@ app.post("/api/notes", (req, res) => {
 app.delete('/api/notes/:id', function (req, res) {
     const deleteId = parseInt(req.params.id);
     readDb().then(data => {
-        let db = JSON.parse(data);
-        db = db.filter(note => {
-            let {id} = note;
-            return id === deleteId ? false : true;
-        });
-       writeDb(JSON.stringify(db)).then(message => {
-           res.send("Note Deleted!");
-       })
+        const db = JSON.parse(data)
+        .filter(({id} = note) => id === deleteId ? false : true);
+        writeDb(JSON.stringify(db)).then(message => {
+            res.send("Note Deleted!");
+        })
     });
 })
 
@@ -72,8 +63,6 @@ app.get("/notes", (req, res) => {
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "./index.html"));
 });
-
-// res.sendFile( path.join( __dirname, 'client', 'index.html' ));
 
 app.listen(PORT, () => {
   console.log(`App listening at http://localhost:${PORT}`);
