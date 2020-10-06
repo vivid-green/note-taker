@@ -20,14 +20,18 @@ const readDb = () => {
     })
 };
 
-const writeDb = (newNote) => {
+const writeDb = (db) => {
     return new Promise((resolve,reject) => {
-        fs.writeFile(path.join(__dirname,"./db/db.json"),newNote,(err,data) => {
+        fs.writeFile(path.join(__dirname,"./db/db.json"),db,(err,data) => {
             if(err) return reject(err);
             resolve("File Updated");
         });
     })
 };
+
+const addNote = (newNote,data) => {
+
+}
 
 app.get("/api/notes", (req, res) => {
     res.sendFile(path.join(__dirname,"./db/db.json"));
@@ -42,10 +46,24 @@ app.post("/api/notes", (req, res) => {
         newNote.id = id;
         db.push(newNote);
         writeDb(JSON.stringify(db)).then(message => {
-            res.send(newNote);
+            res.send("Note Saved!");
         })
     })
 });
+
+app.delete('/api/notes/:id', function (req, res) {
+    const deleteId = parseInt(req.params.id);
+    readDb().then(data => {
+        let db = JSON.parse(data);
+        db = db.filter(note => {
+            let {id} = note;
+            return id === deleteId ? false : true;
+        });
+       writeDb(JSON.stringify(db)).then(message => {
+           res.send("Note Deleted!");
+       })
+    });
+})
 
 app.get("/notes", (req, res) => {
     res.sendFile(path.join(__dirname, "public" ,"./notes.html"));
