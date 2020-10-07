@@ -3,6 +3,7 @@ const $noteText = $(".note-textarea");
 const $saveNoteBtn = $(".save-note");
 const $newNoteBtn = $(".new-note");
 const $noteList = $(".list-container .list-group");
+const $alerts = $(".alerts");
 
 // activeNote is used to keep track of the note in the textarea
 let activeNote = {};
@@ -21,7 +22,7 @@ const saveNote = (note) => {
     url: "/api/notes",
     data: note,
     method: "POST",
-  });
+  }).then(res => res);
 };
 
 // A function for deleting a note from the db
@@ -29,7 +30,7 @@ const deleteNote = (id) => {
   return $.ajax({
     url: "api/notes/" + id,
     method: "DELETE",
-  });
+  }).then(res => res);
 };
 
 // If there is an activeNote, display it, otherwise render empty inputs
@@ -56,9 +57,15 @@ const handleNoteSave = function () {
     text: $noteText.val(),
   };
 
-  saveNote(newNote).then(() => {
+  saveNote(newNote).then((res) => {
     getAndRenderNotes();
     renderActiveNote();
+    const { id , message, title, text } = res; 
+    const $alertInput = $(`<input class="alert-state" id="alert-s-${id}" type="checkbox">`);
+    const $alertBodyDiv = $(`<div class="alert alert-secondary dismissible"></div>`);
+    $alertBodyDiv.append($(`<h3>${title} ${message}:\n${text.substring(0,50)}...</h3>`));
+    $alertBodyDiv.append($(`<label class="btn-close" for="alert-s-${id}">X</label>`));
+    $alerts.append($alertInput,$alertBodyDiv);
   });
 };
 
@@ -73,9 +80,15 @@ const handleNoteDelete = function (event) {
     activeNote = {};
   }
 
-  deleteNote(note.id).then(() => {
+  deleteNote(note.id).then((res) => {
     getAndRenderNotes();
     renderActiveNote();
+    const { id , message, title, text } = res; 
+    const $alertInput = $(`<input class="alert-state" id="alert-d-${id}" type="checkbox">`);
+    const $alertBodyDiv = $(`<div class="alert alert-warning dismissible"></div>`);
+    $alertBodyDiv.append($(`<h3>${title} ${message}:\n${text.substring(0,50)}...</h3>`));
+    $alertBodyDiv.append($(`<label class="btn-close" for="alert-d-${id}">X</label>`));
+    $alerts.append($alertInput,$alertBodyDiv);
   });
 };
 

@@ -35,7 +35,9 @@ module.exports = function(app) {
             newNote.id = id;
             db.push(newNote);
             writeDb(JSON.stringify(db)).then(message => {
-                res.send("Note Saved!");
+                const saveMessage = newNote;
+                saveMessage.message = "SAVED";
+                res.json(saveMessage);
             })
         })
     });
@@ -43,10 +45,19 @@ module.exports = function(app) {
     app.delete('/api/notes/:id', function (req, res) {
         const deleteId = parseInt(req.params.id);
         readDb().then(data => {
+            const deleteMessage = {};
             const db = JSON.parse(data)
-            .filter(({id} = note) => id === deleteId ? false : true);
+            .filter(({id, title, text} = note) => {
+                if(id === deleteId) {
+                    deleteMessage.id = id;
+                    deleteMessage.title = title;
+                    deleteMessage.text = text;
+                };
+                return id === deleteId ? false : true;
+            });
             writeDb(JSON.stringify(db)).then(message => {
-                res.send("Note Deleted!");
+                deleteMessage.message = "DELETED";
+                res.send(deleteMessage);
             })
         });
     })    
